@@ -4,8 +4,7 @@
 #mac OS X => use brew gnu-getopt, bash
 #getopt='/usr/local/Cellar/gnu-getopt/1.1.4/bin/getopt'
 
-PARSED_OPTIONS=$(getopt -n "$0" -o hdp:s:b: --long "help,delete,path:,samplerate:,bitrate:"  -- "$@")
-
+PARSED_OPTIONS=$(getopt -n "$0" -o hdp:s:b:n --long "help,delete,path:,samplerate:,bitrate:,dry-run"  -- "$@")
 
 # Bad arguments, something has gone wrong with the getopt command.
 if [ $? -ne 0 ]; then echo "Terminating..."; >&2; exit 1; fi
@@ -15,6 +14,7 @@ DELETE=false
 FLAC_DIR=.
 SAMPLERATE='44100'
 BITRATE='192k'
+DRYRUN=false
 
 
 usage()
@@ -31,6 +31,7 @@ OPTIONS:
 	-p, --path         Path to files (default to current directory)
 	-s, --samplerate   Sampling rate (default to 44100KHz)
 	-b, --bitrate      Bitrate (default to 192Kbps)
+	-n, --dry-run      Don't do nothing, just show what would be done
 "
 }
 
@@ -45,6 +46,7 @@ while true ; do
                 -p|--path) FLAC_DIR="$2" ; shift 2;;
                 -s|--samplerate) SAMPLERATE="$2" ; shift 2 ;;
                 -b|--bitrate) BITRATE="$2" ; shift 2 ;;
+				-n|--dry-run) DRYRUN=true ; shift ;;
 
                 --) shift ; break ;;
                 *) echo "Internal error!" ; exit 1 ;;
@@ -53,14 +55,25 @@ done
 
 IFS=
 while read -r flac; do 
+
 	TRACK=`basename "$flac" .flac`;
 	DIR=`dirname "$flac"`;
-		
-	ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3";
+	``
+	if [ $DRYRUN == true ]
+	then
+		echo ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3"; 
+	else
+		ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3";
+	fi
 
 	# only delete if everythings ok
 	if [ $DELETE == true -a $? == 0 ]
 	then
-		rm "$flac"
+		if [ $DRYRUN == true ]
+		then
+			echo rm "$flac"
+		else
+			rm "$flac"
+		fi
 	fi
 done < <(find $FLAC_DIR -iname \*flac)
