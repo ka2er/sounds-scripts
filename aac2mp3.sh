@@ -11,7 +11,7 @@ if [ $? -ne 0 ]; then echo "Terminating..."; >&2; exit 1; fi
 
 # defaults
 DELETE=false
-FLAC_DIR=.
+AAC_DIR=.
 SAMPLERATE='44100'
 QUALITY='2'
 DRYRUN=false
@@ -22,7 +22,7 @@ usage()
 	echo "
 usage: $0 options
 
-This script will convert all the flac found in the given path.
+This script will convert all the aac found in the given path to mp3.
 Default mp3 settings are 192Kbps VBR 44.1KHz
 
 OPTIONS:
@@ -54,15 +54,15 @@ while true ; do
 done
 
 IFS=
-while read -r flac; do 
-	TRACK=`basename "$flac" .flac`;
-	DIR=`dirname "$flac"`;
+while read -r aac; do 
+	TRACK=`basename "$aac" .m4a`;
+	DIR=`dirname "$aac"`;
 	
 	if [ $DRYRUN == true ]
 	then
-		echo ffmpeg -i "$flac" -y -ac 2 -aq "$QUALITY" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3 < /dev/null"; 
+		echo ffmpeg -i "$aac" -y -ac 2 -aq "$QUALITY" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3 < /dev/null"; 
 	else
-		ffmpeg -i "$flac" -y -ac 2 -aq "$QUALITY" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3" < /dev/null;
+		ffmpeg -i "$aac" -y -ac 2 -aq "$QUALITY" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3" < /dev/null;
 	fi
 
 	# only delete if everythings ok
@@ -70,9 +70,9 @@ while read -r flac; do
 	then
 		if [ $DRYRUN == true ]
 		then
-			echo rm "$flac"
+			echo rm "$aac"
 		else
-			rm "$flac"
+			rm "$aac"
 		fi
 	fi
-done < <(find $FLAC_DIR -iname \*flac)
+done < <(find $AAC_DIR -iname \*m4a)
