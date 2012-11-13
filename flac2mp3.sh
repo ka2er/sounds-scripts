@@ -55,15 +55,14 @@ done
 
 IFS=
 while read -r flac; do 
-
 	TRACK=`basename "$flac" .flac`;
 	DIR=`dirname "$flac"`;
 	``
 	if [ $DRYRUN == true ]
 	then
-		echo ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3"; 
+		echo ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3 < /dev/null"; 
 	else
-		ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3";
+		ffmpeg -i "$flac" -ac 2 -ab "$BITRATE" -ar "$SAMPLERATE" "$DIR/$TRACK.mp3" < /dev/null;
 	fi
 
 	# only delete if everythings ok
